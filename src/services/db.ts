@@ -310,13 +310,63 @@ export const updateRequisitionStatus = (id: string, status: JobRequisition['stat
   localStorage.setItem(REQUISITION_STORAGE_KEY, JSON.stringify(updated));
 };
 
+export const deleteRequisition = (id: string): void => {
+  const reqs = getRequisitions();
+  const updated = reqs.filter(r => r.id !== id);
+  localStorage.setItem(REQUISITION_STORAGE_KEY, JSON.stringify(updated));
+};
+
+export const deleteCandidate = (id: string): void => {
+  const cands = getCandidates();
+  const updated = cands.filter(c => c.id !== id);
+  localStorage.setItem(CANDIDATE_STORAGE_KEY, JSON.stringify(updated));
+};
+
+const CANDIDATE_DATE_MAP: Record<string, string> = {
+  'SHALOMKUMAR RAJWADI': '15/05/2025',
+  'VRUND PATEL': '15/05/2025',
+  'YADAV NIPESH': '15/05/2025',
+  'HARSH PATEL': '15/05/2025',
+  'DEEPAK KAMBLE': '16/05/2025',
+  'PIYUSH SINGH': '16/05/2025',
+  'MAHESH BHONDE': '27/04/2026',
+  'NITISH N. MIGLANI': '28/04/2026',
+  'SHIVANGI DALMIA': '04/05/2026',
+  'NEHA SAXENA': '17/06/2026'
+};
+
 export const getCandidates = (): Candidate[] => {
   const data = localStorage.getItem(CANDIDATE_STORAGE_KEY);
+  let parsed: Candidate[] = [];
   if (!data) {
+    parsed = INITIAL_CANDIDATES;
     localStorage.setItem(CANDIDATE_STORAGE_KEY, JSON.stringify(INITIAL_CANDIDATES));
-    return INITIAL_CANDIDATES;
+  } else {
+    try {
+      parsed = JSON.parse(data);
+    } catch {
+      parsed = INITIAL_CANDIDATES;
+    }
   }
-  return JSON.parse(data);
+
+  return parsed.map(c => {
+    let cleanEmail = c.email;
+    if (!cleanEmail || cleanEmail.includes('candidate_') || cleanEmail.includes('applicant') || cleanEmail.toLowerCase() === 'n/a') {
+      cleanEmail = 'NA';
+    }
+
+    let date = c.appliedDate;
+    if (!date || date === 'NA' || date === 'N/A' || date === '') {
+      const nameUpper = (c.fullName || '').toUpperCase().trim();
+      date = CANDIDATE_DATE_MAP[nameUpper] || c.createdAt || '15/05/2025';
+    }
+
+    return {
+      ...c,
+      email: cleanEmail,
+      appliedDate: date
+    };
+  });
 };
 
 export const saveCandidate = (candidateData: Partial<Candidate> & { fullName: string; jobId: string; jobTitle: string; email: string; phone: string }): Candidate => {
@@ -392,7 +442,7 @@ export const getGoogleSheetConfig = (): GoogleSheetConfig => {
   if (!data) {
     const defaultConfig: GoogleSheetConfig = {
       webhookUrl: '',
-      sheetId: '',
+      sheetId: '1lS7zlQAjVgjL0mjfo58IYhhD1CHpIQdLho58MMaExl0',
       autoSyncOnApply: true,
       autoSyncOnStageChange: true
     };
@@ -400,8 +450,7 @@ export const getGoogleSheetConfig = (): GoogleSheetConfig => {
     return defaultConfig;
   }
   const parsed = JSON.parse(data);
-  // Migrate old configs that don't have sheetId
-  if (!parsed.sheetId) parsed.sheetId = '';
+  if (!parsed.sheetId) parsed.sheetId = '1lS7zlQAjVgjL0mjfo58IYhhD1CHpIQdLho58MMaExl0';
   return parsed;
 };
 

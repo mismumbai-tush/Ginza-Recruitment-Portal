@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlusCircle, Send, Sparkles } from 'lucide-react';
+import { PlusCircle, Send, Sparkles, Building2 } from 'lucide-react';
 import type { JobRequisition, PriorityLevel } from '../types/recruitment';
 
 interface RequisitionFormProps {
@@ -7,25 +7,49 @@ interface RequisitionFormProps {
   onCancel: () => void;
 }
 
+const DEFAULT_UNITS = [
+  'UDH',
+  'SAC',
+  'EHU',
+  'CKU',
+  'Ginza Corporate Office',
+  'Unit 1 - Main Manufacturing Plant',
+  'Unit 2 - Production & Assembly Division',
+  'Unit 3 - Textile & Garment Division',
+  'R&D Hub',
+  'Warehouse & Logistics',
+  'Other / Custom Branch'
+] as const;
+
 export const RequisitionForm: React.FC<RequisitionFormProps> = ({ onSubmit, onCancel }) => {
+  const [selectedUnit, setSelectedUnit] = useState<string>('UDH');
+  const [customUnit, setCustomUnit] = useState<string>('');
+
   const [formData, setFormData] = useState({
     title: '',
-    department: 'Engineering',
-    location: 'San Francisco, CA (Hybrid)',
+    department: '',
+    location: '',
     employmentType: 'Full-time' as JobRequisition['employmentType'],
-    experienceYears: '3 - 5 Years',
-    budgetSalary: '$120,000 - $140,000 / Year',
+    experienceYears: '',
+    highestQualification: '',
+    budgetSalary: '',
+    expectedJoiningDate: '',
+    preferredGender: 'Any',
     vacancies: 1,
-    priority: 'Medium' as PriorityLevel,
-    requestedBy: 'David Miller (Tech Lead)',
-    requesterEmail: 'david.m@company.com',
+    priority: 'High' as PriorityLevel,
+    requestedBy: '',
+    requesterEmail: '',
+    reasonForRequisition: 'New Position / Team Expansion',
     responsibilities: '',
-    requiredSkillsStr: 'React, TypeScript, Node.js',
+    requiredSkillsStr: '',
+    jobTiming: '',
+    attachJd: '',
     description: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const finalUnit = selectedUnit === 'Other / Custom Branch' ? customUnit : selectedUnit;
     const skillsArray = formData.requiredSkillsStr
       .split(',')
       .map(s => s.trim())
@@ -33,131 +57,221 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({ onSubmit, onCa
 
     onSubmit({
       title: formData.title,
+      unitBranch: finalUnit,
       department: formData.department,
       location: formData.location,
       employmentType: formData.employmentType,
       experienceYears: formData.experienceYears,
+      highestQualification: formData.highestQualification,
       budgetSalary: formData.budgetSalary,
+      expectedJoiningDate: formData.expectedJoiningDate,
+      preferredGender: formData.preferredGender,
       vacancies: Number(formData.vacancies),
       priority: formData.priority,
       requestedBy: formData.requestedBy,
       requesterEmail: formData.requesterEmail,
+      reasonForRequisition: formData.reasonForRequisition,
       responsibilities: formData.responsibilities,
       requiredSkills: skillsArray,
-      description: formData.description
+      jobTiming: formData.jobTiming,
+      attachJd: formData.attachJd,
+      description: formData.description || formData.responsibilities
     });
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-2xl max-w-3xl mx-auto text-white">
+    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl max-w-4xl mx-auto text-white">
       <div className="flex items-center justify-between border-b border-slate-800 pb-5 mb-6">
         <div className="flex items-center space-x-3">
-          <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20">
+          <div className="p-3 bg-purple-500/10 text-purple-400 rounded-2xl border border-purple-500/20">
             <PlusCircle className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white">Job Requirement Requisition Template</h2>
-            <p className="text-sm text-slate-400">Fill details to request a new position opening for HR team approval</p>
+            <h2 className="text-xl font-bold text-white font-display">MRF — Manpower Requisition Form</h2>
+            <p className="text-sm text-slate-400">Blank requisition template matching your MRF Google Sheet</p>
           </div>
         </div>
-        <span className="hidden sm:inline-flex items-center text-xs px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-          <Sparkles className="w-3.5 h-3.5 mr-1" /> Template V2.4
+        <span className="hidden sm:inline-flex items-center text-xs px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-mono">
+          <Sparkles className="w-3.5 h-3.5 mr-1" /> Ready For HR Review
         </span>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        
+        {/* Section 1: Position & Unit */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
             <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-              Job Title *
+              Required Position (Job Title) *
             </label>
             <input
               type="text"
               required
-              placeholder="e.g. Senior Frontend Engineer"
+              placeholder="e.g. Senior Production Engineer"
               value={formData.title}
               onChange={e => setFormData({ ...formData, title: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 font-sans"
             />
           </div>
 
+          {/* Unit / Branch Selector with preset list for user help */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2 flex items-center justify-between">
+              <span>Unit / Branch *</span>
+              <Building2 className="w-3.5 h-3.5 text-indigo-400" />
+            </label>
+            <select
+              value={selectedUnit}
+              onChange={e => setSelectedUnit(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 cursor-pointer font-sans"
+            >
+              {DEFAULT_UNITS.map(u => (
+                <option key={u} value={u}>{u}</option>
+              ))}
+            </select>
+
+            {selectedUnit === 'Other / Custom Branch' && (
+              <input
+                type="text"
+                required
+                placeholder="Enter custom Unit / Branch name..."
+                value={customUnit}
+                onChange={e => setCustomUnit(e.target.value)}
+                className="w-full mt-2.5 bg-slate-950 border border-indigo-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none"
+              />
+            )}
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              Your Name (Requester) *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Rajesh Sharma"
+              value={formData.requestedBy}
+              onChange={e => setFormData({ ...formData, requestedBy: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 font-sans"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              Email Address *
+            </label>
+            <input
+              type="email"
+              required
+              placeholder="e.g. rajesh.s@ginzalimited.com"
+              value={formData.requesterEmail}
+              onChange={e => setFormData({ ...formData, requesterEmail: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 font-sans"
+            />
+          </div>
+        </div>
+
+        {/* Section 2: Requisition Details */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-4 border-t border-slate-800">
           <div>
             <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
               Department *
             </label>
-            <select
-              value={formData.department}
-              onChange={e => setFormData({ ...formData, department: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-            >
-              <option value="Engineering">Engineering</option>
-              <option value="Product & Design">Product & Design</option>
-              <option value="Data & AI">Data & AI</option>
-              <option value="Marketing">Marketing</option>
-              <option value="Sales & Business">Sales & Business</option>
-              <option value="Finance & Operations">Finance & Operations</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-              Location & Work Mode *
-            </label>
             <input
               type="text"
               required
-              placeholder="e.g. San Francisco, CA (Hybrid) or Remote"
-              value={formData.location}
-              onChange={e => setFormData({ ...formData, location: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              placeholder="e.g. Engineering, Manufacturing, General, Sales..."
+              value={formData.department}
+              onChange={e => setFormData({ ...formData, department: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 font-sans"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-              Employment Type
+              Reason for Requisition
             </label>
             <select
-              value={formData.employmentType}
-              onChange={e => setFormData({ ...formData, employmentType: e.target.value as any })}
-              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              value={formData.reasonForRequisition}
+              onChange={e => setFormData({ ...formData, reasonForRequisition: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
-              <option value="Full-time">Full-time</option>
-              <option value="Part-time">Part-time</option>
-              <option value="Contract">Contract</option>
-              <option value="Remote">Remote</option>
+              <option value="New Position / Team Expansion">New Position / Team Expansion</option>
+              <option value="Replacement for Resigned Employee">Replacement for Resigned Employee</option>
+              <option value="Project Specific Hiring">Project Specific Hiring</option>
+              <option value="Workload Increase">Workload Increase</option>
             </select>
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-              Required Experience
+              Experience (Required)
             </label>
             <input
               type="text"
               placeholder="e.g. 3 - 5 Years"
               value={formData.experienceYears}
               onChange={e => setFormData({ ...formData, experienceYears: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 font-sans"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-              Approved Salary Budget Range
+              Highest Qualification
             </label>
             <input
               type="text"
-              placeholder="e.g. $120,000 - $140,000 / Year"
-              value={formData.budgetSalary}
-              onChange={e => setFormData({ ...formData, budgetSalary: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              placeholder="e.g. B.Tech / B.E / MBA"
+              value={formData.highestQualification}
+              onChange={e => setFormData({ ...formData, highestQualification: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 font-sans"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-              Number of Vacancies
+              CTC (Budget Salary Range)
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. ₹8,00,000 - ₹12,00,000 / Year"
+              value={formData.budgetSalary}
+              onChange={e => setFormData({ ...formData, budgetSalary: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 font-sans"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              Expected Joining Date
+            </label>
+            <input
+              type="date"
+              value={formData.expectedJoiningDate}
+              onChange={e => setFormData({ ...formData, expectedJoiningDate: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              Preferred Gender
+            </label>
+            <select
+              value={formData.preferredGender}
+              onChange={e => setFormData({ ...formData, preferredGender: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+            >
+              <option value="Any">Any / No Preference</option>
+              <option value="Male">Male Preference</option>
+              <option value="Female">Female Preference</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              Vacancies Count
             </label>
             <input
               type="number"
@@ -165,18 +279,31 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({ onSubmit, onCa
               max="50"
               value={formData.vacancies}
               onChange={e => setFormData({ ...formData, vacancies: Number(e.target.value) })}
-              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 font-sans"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-              Hiring Urgency Priority
+              Job Timing / Shift
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. General Shift (9 AM - 6 PM)"
+              value={formData.jobTiming}
+              onChange={e => setFormData({ ...formData, jobTiming: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 font-sans"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              Priority Status
             </label>
             <select
               value={formData.priority}
               onChange={e => setFormData({ ...formData, priority: e.target.value as PriorityLevel })}
-              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
               <option value="Low">Low Priority</option>
               <option value="Medium">Medium Priority</option>
@@ -186,74 +313,62 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({ onSubmit, onCa
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2 border-t border-slate-800">
+        {/* Section 3: Work Address & Profile */}
+        <div className="space-y-4 pt-4 border-t border-slate-800">
           <div>
             <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-              Requester Name
+              Work Address (Unit work address with street number and pin code) *
             </label>
             <input
               type="text"
               required
-              value={formData.requestedBy}
-              onChange={e => setFormData({ ...formData, requestedBy: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              placeholder="e.g. Plot No. 42, Industrial Park, MIDC, Mumbai - 400072"
+              value={formData.location}
+              onChange={e => setFormData({ ...formData, location: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 font-sans"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-              Requester Email
+              Required Skills (Comma-separated) *
             </label>
             <input
-              type="email"
+              type="text"
               required
-              value={formData.requesterEmail}
-              onChange={e => setFormData({ ...formData, requesterEmail: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              placeholder="e.g. PLC Automation, Quality Control, Manufacturing, Team Management"
+              value={formData.requiredSkillsStr}
+              onChange={e => setFormData({ ...formData, requiredSkillsStr: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 font-sans"
             />
           </div>
-        </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-            Required Core Skills (Comma-separated) *
-          </label>
-          <input
-            type="text"
-            required
-            placeholder="e.g. React, TypeScript, GraphQL, AWS"
-            value={formData.requiredSkillsStr}
-            onChange={e => setFormData({ ...formData, requiredSkillsStr: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-          />
-        </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              Work Profile (Mention Key Roles & Responsibilities) *
+            </label>
+            <textarea
+              rows={3}
+              required
+              placeholder="Describe key roles, daily duties, and targets for this position..."
+              value={formData.responsibilities}
+              onChange={e => setFormData({ ...formData, responsibilities: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 font-sans"
+            />
+          </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-            Key Responsibilities & Deliverables
-          </label>
-          <textarea
-            rows={3}
-            required
-            placeholder="List key job responsibilities..."
-            value={formData.responsibilities}
-            onChange={e => setFormData({ ...formData, responsibilities: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-            Full Job Description
-          </label>
-          <textarea
-            rows={4}
-            required
-            placeholder="Detailed description of the role for candidate portal..."
-            value={formData.description}
-            onChange={e => setFormData({ ...formData, description: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-          />
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              Attach JD Link (Optional)
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. https://drive.google.com/file/d/xyz... or JD document link"
+              value={formData.attachJd}
+              onChange={e => setFormData({ ...formData, attachJd: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-750 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 font-sans"
+            />
+          </div>
         </div>
 
         <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-800">
@@ -266,10 +381,10 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({ onSubmit, onCa
           </button>
           <button
             type="submit"
-            className="flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium text-sm shadow-lg shadow-indigo-600/30 hover:brightness-110 transition-all"
+            className="flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 hover:brightness-110 transition-all font-display"
           >
             <Send className="w-4 h-4" />
-            <span>Submit Requisition for HR Approval</span>
+            <span>Submit Blank MRF Requisition</span>
           </button>
         </div>
       </form>

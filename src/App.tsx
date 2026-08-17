@@ -12,9 +12,11 @@ import {
   getRequisitions,
   saveRequisition,
   updateRequisitionStatus,
+  deleteRequisition,
   getCandidates,
   saveCandidate,
   updateCandidateStage,
+  deleteCandidate,
   addInterviewEvaluation,
   getGoogleSheetConfig,
   saveGoogleSheetConfig
@@ -32,6 +34,9 @@ import type { JobRequisition, Candidate, CandidateStage, GoogleSheetConfig, Inte
 export function App() {
   const [currentRole, setCurrentRole] = useState<'manager' | 'hr' | 'candidate'>('hr');
   const [activeTab, setActiveTab] = useState<string>('ats');
+  const [themeMode, setThemeMode] = useState<'dark' | 'light'>(() => {
+    return (localStorage.getItem('talentpulse_theme_v1') as 'dark' | 'light') || 'dark';
+  });
 
   const [requisitions, setRequisitions] = useState<JobRequisition[]>([]);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -52,6 +57,11 @@ export function App() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    document.body.className = `theme-${themeMode}`;
+    localStorage.setItem('talentpulse_theme_v1', themeMode);
+  }, [themeMode]);
+
+  useEffect(() => {
     const reqs = getRequisitions();
     setRequisitions(reqs);
     setCandidates(getCandidates());
@@ -69,6 +79,14 @@ export function App() {
       }
     }
   }, []);
+
+  const handleToggleTheme = () => {
+    setThemeMode(prev => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      triggerToast(`Switched to ${next === 'dark' ? '🌙 Dark Mode' : '☀️ Light Mode'}`);
+      return next;
+    });
+  };
 
   const triggerToast = (msg: string) => {
     setToastMessage(msg);
@@ -152,7 +170,9 @@ export function App() {
 
     // Process Candidate Rows matching user's exact columns
     if (candidateRows && candidateRows.length > 0) {
-      const existingCandidates = getCandidates();
+      // Purge default sample mock candidates if sheet candidates exist to keep counts exact
+      let existingCandidates = getCandidates().filter(c => !c.id.startsWith('CAN-100'));
+
       candidateRows.forEach((row, idx) => {
         const fullName = getValueByFlexibleKey(row, ['Name', 'Full Name', 'Candidate Name', 'Applicant Name']);
         if (fullName) {
@@ -190,7 +210,7 @@ export function App() {
               });
             }
 
-            const r2Name = getValueByFlexibleKey(row, ['2nd Interviewer Name']);
+            const r2Name = getValueByFlexibleKey(row, ['2nd Interviewer Name', '2nd Interview Name']);
             const r2Rem = getValueByFlexibleKey(row, ['2nd Interview Remarks']);
             if (r2Name || r2Rem || r2Status) {
               evaluations.push({
@@ -216,44 +236,73 @@ export function App() {
               });
             }
 
-            saveCandidate({
+            const rawEmail = getValueByFlexibleKey(row, ['Email', 'Email Address', 'EmailId', 'Mail']);
+            const emailClean = rawEmail && rawEmail.toLowerCase() !== 'n/a' && rawEmail.toLowerCase() !== 'na' && !rawEmail.includes('applicant') && !rawEmail.includes('candidate_') ? rawEmail : 'NA';
+
+            const newCand: Candidate = {
+              id: candId,
               jobId: 'REQ-2026-001',
-              jobTitle: getValueByFlexibleKey(row, ['Position Applying For', 'Job Title', 'Position', 'Role']) || 'General Applicant',
+              jobTitle: getValueByFlexibleKey(row, ['Position Applying For', 'Position', 'Applied Role', 'Role']) || 'General Applicant',
               fullName,
-              email: getValueByFlexibleKey(row, ['Email', 'Email Address']) || `candidate_${idx + 1}@gmail.com`,
-              phone: getValueByFlexibleKey(row, ['Contact No.', 'Contact No', 'Phone', 'Mobile']) || '+91 9876543210',
-              education: getValueByFlexibleKey(row, ['Education Qualification', 'Education', 'Qualification']),
+              email: emailClean,
+              phone: getValueByFlexibleKey(row, ['Contact No.', 'Contact No', 'Phone', 'Mobile']) || 'NA',
+              educationQualification: getValueByFlexibleKey(row, ['Education Qualification', 'Qualification']),
               currentCompany: getValueByFlexibleKey(row, ['Current/ Last Company Name', 'Current Company', 'Company']) || 'N/A',
-              currentDesignation: getValueByFlexibleKey(row, ['Position Month-Year', 'Designation']) || 'Applicant',
-              experienceYears: getValueByFlexibleKey(row, ['Total Experience', 'Experience']) || '3 Years',
-              currentSalary: getValueByFlexibleKey(row, ['Current/ Last Salary/ CTC', 'Current CTC']),
-              expectedSalary: getValueByFlexibleKey(row, ['Expected Salary/ CTC', 'Expected CTC', 'Expected Salary']) || 'Negotiable',
-              noticePeriod: getValueByFlexibleKey(row, ['Notice Period', 'Notice']) || 'Immediate / 30 Days',
-              switchReason: getValueByFlexibleKey(row, ['Why looking to switch?']),
-              source: getValueByFlexibleKey(row, ['Source']) || 'Sheet Import',
-              sourceCategory: getValueByFlexibleKey(row, ['Source Category']),
+              currentDesignation: getValueByFlexibleKey(row, ['Position Month-Year', 'Current Designation', 'Designation']) || 'Applicant',
+              noticePeriod: getValueByFlexibleKey(row, ['Notice Period', 'Notice']) || 'N/A',
+              experienceYears: getValueByFlexibleKey(row, ['Total Experience', 'Total Experience ', 'Experience']) || 'N/A',
+              currentSalary: getValueByFlexibleKey(row, ['Current/ Last Salary/ CTC', 'Current Salary']),
+              expectedSalary: getValueByFlexibleKey(row, ['Expected Salary/ CTC', 'Expected Salary']) || 'N/A',
+              whyLookingToSwitch: getValueByFlexibleKey(row, ['Why looking to switch?']),
+              source: getValueByFlexibleKey(row, ['Source', 'Source Category']) || 'Google Sheet Import',
               resumeFileName: getValueByFlexibleKey(row, ['Resume (Attach)', 'Resume']) || `${fullName.replace(/\s+/g, '_')}_Resume.pdf`,
-              resumeSummary: getValueByFlexibleKey(row, ['Screening Remarks', 'Why looking to switch?']) || `Applied for ${getValueByFlexibleKey(row, ['Position Applying For']) || 'Open Role'}`,
-              location: getValueByFlexibleKey(row, ['Current Location (City, State)', 'Location']),
-              unit: getValueByFlexibleKey(row, ['Unit']),
-              screeningStatus,
+              resumeSummary: `Imported from Google Sheet Candidates Tab.`,
+              location: getValueByFlexibleKey(row, ['Current Location (City, State)', 'Location', 'City']),
+              sourceCategory: getValueByFlexibleKey(row, ['Source Category']),
+              unit: getValueByFlexibleKey(row, ['Unit', 'Branch']),
+              screeningStatus: getValueByFlexibleKey(row, ['Screening Status']),
               screeningRemarks: getValueByFlexibleKey(row, ['Screening Remarks']),
-              stage: derivedStage,
-              evaluations,
+              sendMessageToUnreachable: getValueByFlexibleKey(row, ['Send Message to Unreachable']),
+              messageSent: getValueByFlexibleKey(row, ['Message Sent']),
+              positionMonthYear: getValueByFlexibleKey(row, ['Position Month-Year']),
               joiningDate: getValueByFlexibleKey(row, ['Joining Date', 'Date of Joining']),
-              offeredSalary: getValueByFlexibleKey(row, ['Offered Salary /  CTC', 'Offered Salary']),
+              offeredSalary: getValueByFlexibleKey(row, ['Offered Salary /  CTC', 'Offered Salary / CTC']),
+              offerNegotiationDate: getValueByFlexibleKey(row, ['Offer Negotiation Date']),
+              offerNegotiationStatus: getValueByFlexibleKey(row, ['Offer negotiation Status']),
+              hrDiscussionDate: getValueByFlexibleKey(row, ['HR Discussion (Date)']),
+              hrRemarksStatus: getValueByFlexibleKey(row, ['HR Remarks Status']),
+              offerLetterShareDate: getValueByFlexibleKey(row, ['Offer Letter Share (Date)']),
+              offerLetterAcceptanceDate: getValueByFlexibleKey(row, ['Offer Letter Acceptance (Date)']),
               offerLetterStatus: getValueByFlexibleKey(row, ['Offer Letter (Status)']),
-              joiningStatus,
+              monthOfJoining: getValueByFlexibleKey(row, ['Month of joining']),
+              joiningStatus: getValueByFlexibleKey(row, ['Joining Status']),
               remarks: getValueByFlexibleKey(row, ['Remarks']),
-            });
+              hiringAgencyCharges: getValueByFlexibleKey(row, ['Hiring/ Agency Charges']),
+              stage: derivedStage,
+              appliedDate: String(row['Timestamp'] || row['appliedDate'] || (Object.keys(row).length > 0 ? row[Object.keys(row)[0]] : '') || getValueByFlexibleKey(row, ['Timestamp', 'Applied Date', 'Date']) || '15/05/2025').trim(),
+              lastUpdated: new Date().toISOString().split('T')[0],
+              evaluations,
+              syncedToGoogleSheet: true
+            };
+
+            existingCandidates.push(newCand);
             candidateImportedCount++;
           }
         }
       });
-      setCandidates(getCandidates());
+      localStorage.setItem('talentpulse_candidates_v1', JSON.stringify(existingCandidates));
+      setCandidates(existingCandidates);
     }
 
-    triggerToast(`📊 Imported ${mrfImportedCount} new MRFs and ${candidateImportedCount} candidates from your Google Sheet!`);
+    triggerToast(`📊 Imported ${mrfImportedCount} new MRFs and ${candidateImportedCount} candidates from your Google Sheet! Total candidate count: ${getCandidates().length}`);
+  };
+
+  const handlePurgeMockData = () => {
+    const currentCands = getCandidates();
+    const filtered = currentCands.filter(c => !c.id.startsWith('CAN-100'));
+    localStorage.setItem('talentpulse_candidates_v1', JSON.stringify(filtered));
+    setCandidates(filtered);
+    triggerToast(`🧹 Removed mock demo applicants! Total real sheet candidates count: ${filtered.length}`);
   };
 
   // Candidate Application Submission
@@ -321,12 +370,29 @@ export function App() {
     triggerToast('✅ Google Sheets configuration saved!');
   };
 
+  const handleDeleteRequisition = (id: string) => {
+    deleteRequisition(id);
+    const updated = getRequisitions();
+    setRequisitions(updated);
+    triggerToast(`🗑️ Permanently deleted requirement record.`);
+  };
 
+  const handleDeleteCandidate = (id: string) => {
+    deleteCandidate(id);
+    const updated = getCandidates();
+    setCandidates(updated);
+    if (selectedCandidate && selectedCandidate.id === id) {
+      setSelectedCandidate(null);
+    }
+    triggerToast(`🗑️ Permanently deleted candidate record.`);
+  };
 
   const publishedJobs = requisitions.filter(r => r.status === 'Published');
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-300 ${
+      themeMode === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
+    }`}>
       <Navbar
         currentRole={currentRole}
         setCurrentRole={setCurrentRole}
@@ -335,6 +401,10 @@ export function App() {
         gsheetConfig={gsheetConfig}
         onOpenGSheetsModal={() => setShowGSheetsModal(true)}
         onExportCSV={() => exportCandidatesToCSV(candidates)}
+        onPurgeMockData={handlePurgeMockData}
+        candidateCount={candidates.length}
+        themeMode={themeMode}
+        onToggleTheme={handleToggleTheme}
       />
 
       {/* Toast Notification */}
@@ -352,6 +422,7 @@ export function App() {
             candidates={candidates}
             onSelectCandidate={candidate => setSelectedCandidate(candidate)}
             onUpdateStage={handleUpdateStage}
+            onDeleteCandidate={handleDeleteCandidate}
           />
         )}
 
@@ -368,6 +439,7 @@ export function App() {
               onUpdateStatus={handleUpdateReqStatus}
               onOpenNewForm={() => setShowReqForm(true)}
               currentRole={currentRole}
+              onDeleteRequisition={handleDeleteRequisition}
             />
           )
         )}
@@ -378,6 +450,7 @@ export function App() {
             publishedJobs={publishedJobs}
             onApplyJob={job => setApplyingJob(job)}
             onCopyJobLink={job => triggerToast(`🔗 Direct Application link copied for '${job.title}'! You can paste this on LinkedIn, Naukri, or WhatsApp.`)}
+            onDeleteJob={handleDeleteRequisition}
           />
         )}
       </main>

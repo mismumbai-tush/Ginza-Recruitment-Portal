@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Briefcase, MapPin, DollarSign, Search, Link, Check, Clock, Zap, ChevronRight } from 'lucide-react';
+import { Briefcase, MapPin, DollarSign, Search, Link, Check, Clock, Zap, ChevronRight, Trash2 } from 'lucide-react';
 import type { JobRequisition } from '../types/recruitment';
 import { GINZA_LOGO_URL } from './Navbar';
 
@@ -7,19 +7,16 @@ interface PublicJobPortalProps {
   publishedJobs: JobRequisition[];
   onApplyJob: (job: JobRequisition) => void;
   onCopyJobLink?: (job: JobRequisition) => void;
+  onDeleteJob?: (jobId: string) => void;
 }
 
 const FEATURED_COMPANIES = [
-  { name: 'All Companies', logo: null },
-  { name: 'Ginza Industries Ltd.', logo: GINZA_LOGO_URL },
-  { name: 'Meta', logo: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg' },
-  { name: 'Google', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg' },
-  { name: 'Amazon', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg' }
+  { name: 'Ginza Industries Ltd.', logo: GINZA_LOGO_URL }
 ] as const;
 
-export const PublicJobPortal: React.FC<PublicJobPortalProps> = ({ publishedJobs, onApplyJob, onCopyJobLink }) => {
+export const PublicJobPortal: React.FC<PublicJobPortalProps> = ({ publishedJobs, onApplyJob, onCopyJobLink, onDeleteJob }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCompany, setSelectedCompany] = useState<string>('All Companies');
+  const [selectedCompany, setSelectedCompany] = useState<string>('Ginza Industries Ltd.');
   const [selectedDepartment, setSelectedDepartment] = useState<string>('All');
   const [copiedJobId, setCopiedJobId] = useState<string | null>(null);
 
@@ -74,7 +71,7 @@ export const PublicJobPortal: React.FC<PublicJobPortalProps> = ({ publishedJobs,
               Unlock Your Professional Destiny
             </h1>
             <p className="text-base sm:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed font-sans">
-              Discover career opportunities across <strong className="text-white font-semibold">Ginza Industries Ltd.</strong>, Meta, Google, & Amazon.
+              Discover career opportunities across <strong className="text-white font-semibold">Ginza Industries Ltd.</strong>
             </p>
           </div>
 
@@ -242,6 +239,21 @@ export const PublicJobPortal: React.FC<PublicJobPortalProps> = ({ publishedJobs,
                       <span>Apply Now</span>
                       <ChevronRight className="w-4 h-4" />
                     </button>
+
+                    {onDeleteJob && (
+                      <button
+                        onClick={() => {
+                          if (window.confirm(`Are you sure you want to delete requisition position '${job.title}'?`)) {
+                            onDeleteJob(job.id);
+                          }
+                        }}
+                        className="w-full flex items-center justify-center space-x-1.5 px-4 py-1.5 rounded-xl bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 border border-rose-500/30 text-xs font-semibold transition-colors"
+                        title="Delete position requisition card"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                        <span>Delete Position</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               );

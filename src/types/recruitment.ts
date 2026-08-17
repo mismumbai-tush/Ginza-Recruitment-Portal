@@ -90,11 +90,25 @@ export interface Candidate {
   appliedDate: string;
   lastUpdated: string;
   evaluations: InterviewEvaluation[];
-  joiningDate?: string; // Joining Date / Date of Joining
-  offeredSalary?: string; // Offered Salary / CTC
-  offerLetterStatus?: string; // Offer Letter (Status)
-  joiningStatus?: string; // Joining Status
-  remarks?: string; // Remarks
+  joiningDate?: string;
+  offeredSalary?: string;
+  offerLetterStatus?: string;
+  joiningStatus?: string;
+  sendMessageToUnreachable?: string;
+  messageSent?: string;
+  positionMonthYear?: string;
+  offerNegotiationDate?: string;
+  offerNegotiationStatus?: string;
+  hrDiscussionDate?: string;
+  hrRemarksStatus?: string;
+  offerLetterShareDate?: string;
+  offerLetterAcceptanceDate?: string;
+  monthOfJoining?: string;
+  hiringAgencyCharges?: string;
+  whyLookingToSwitch?: string;
+  remarks?: string;
+  educationQualification?: string;
+  createdAt?: string;
   syncedToGoogleSheet?: boolean;
 }
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Star, FileText, CheckCircle, Calendar, DollarSign, RefreshCw, Mail, Phone, Building } from 'lucide-react';
 import type { Candidate, CandidateStage, InterviewEvaluation } from '../types/recruitment';
+import { formatDisplayDate } from '../services/dateUtils';
 
 interface CandidateDetailModalProps {
   candidate: Candidate;
@@ -79,6 +80,12 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
               <p className="text-sm text-slate-400">
                 Applied for <strong className="text-slate-200">{candidate.jobTitle}</strong>
               </p>
+              {candidate.appliedDate && (
+                <div className="flex items-center space-x-1.5 text-xs text-indigo-300 font-mono mt-1.5 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20 w-fit">
+                  <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Applied Date: <strong>{candidate.appliedDate}</strong></span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -140,29 +147,35 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
         {/* Tab 1: Profile & Resume */}
         {activeTab === 'profile' && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-950 p-4 rounded-2xl border border-slate-800 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 bg-slate-950 p-5 rounded-2xl border border-slate-800 text-xs">
+              {formatDisplayDate(candidate.appliedDate) ? (
+                <div className="flex items-center space-x-2">
+                  <Calendar className="w-4 h-4 text-indigo-400 shrink-0" />
+                  <div><span className="text-slate-400">Timestamp (Date):</span> <strong className="text-indigo-300 font-mono font-bold">{formatDisplayDate(candidate.appliedDate)}</strong></div>
+                </div>
+              ) : null}
               <div className="flex items-center space-x-2">
-                <Mail className="w-4 h-4 text-indigo-400" />
-                <div><span className="text-slate-400">Email:</span> <strong className="text-white">{candidate.email}</strong></div>
+                <Mail className="w-4 h-4 text-indigo-400 shrink-0" />
+                <div><span className="text-slate-400">Email:</span> <strong className="text-white">{candidate.email && candidate.email !== 'N/A' && !candidate.email.includes('applicant') ? candidate.email : 'N/A'}</strong></div>
               </div>
               <div className="flex items-center space-x-2">
-                <Phone className="w-4 h-4 text-indigo-400" />
+                <Phone className="w-4 h-4 text-indigo-400 shrink-0" />
                 <div><span className="text-slate-400">Phone:</span> <strong className="text-white">{candidate.phone}</strong></div>
               </div>
               <div className="flex items-center space-x-2">
-                <Building className="w-4 h-4 text-indigo-400" />
+                <Building className="w-4 h-4 text-indigo-400 shrink-0" />
                 <div><span className="text-slate-400">Company:</span> <strong className="text-white">{candidate.currentCompany || 'N/A'}</strong></div>
               </div>
               <div className="flex items-center space-x-2">
-                <FileText className="w-4 h-4 text-indigo-400" />
+                <FileText className="w-4 h-4 text-indigo-400 shrink-0" />
                 <div><span className="text-slate-400">Experience:</span> <strong className="text-white">{candidate.experienceYears} Years</strong></div>
               </div>
               <div className="flex items-center space-x-2">
-                <DollarSign className="w-4 h-4 text-emerald-400" />
+                <DollarSign className="w-4 h-4 text-emerald-400 shrink-0" />
                 <div><span className="text-slate-400">Expected Sal:</span> <strong className="text-emerald-300">{candidate.expectedSalary}</strong></div>
               </div>
               <div className="flex items-center space-x-2">
-                <Calendar className="w-4 h-4 text-amber-400" />
+                <Calendar className="w-4 h-4 text-amber-400 shrink-0" />
                 <div><span className="text-slate-400">Notice Period:</span> <strong className="text-white">{candidate.noticePeriod}</strong></div>
               </div>
             </div>

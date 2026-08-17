@@ -186,6 +186,11 @@ function doGet(e) {
         for (var ch = 0; ch < candHeaders.length; ch++) {
           cObj[String(candHeaders[ch]).trim()] = candData[c][ch];
         }
+        // Always bind Column A (index 0) to Timestamp and appliedDate
+        if (candData[c][0] !== undefined && candData[c][0] !== null && String(candData[c][0]).trim() !== "") {
+          cObj["Timestamp"] = String(candData[c][0]).trim();
+          cObj["appliedDate"] = String(candData[c][0]).trim();
+        }
         candRows.push(cObj);
       }
     }
@@ -321,6 +326,13 @@ export const getValueByFlexibleKey = (row: Record<string, any>, possibleKeys: st
     const match = rowKeys.find(k => k.toLowerCase().replace(/[^a-z0-9]/g, '') === key.toLowerCase().replace(/[^a-z0-9]/g, ''));
     if (match && row[match] !== undefined && row[match] !== null && String(row[match]).trim() !== '') {
       return String(row[match]).trim();
+    }
+  }
+  // Column A Fallback for Timestamp/Applied Date
+  if (possibleKeys.includes('Timestamp') && rowKeys.length > 0) {
+    const colAVal = row[rowKeys[0]];
+    if (colAVal !== undefined && colAVal !== null && String(colAVal).trim() !== '') {
+      return String(colAVal).trim();
     }
   }
   return '';
