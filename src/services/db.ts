@@ -453,8 +453,8 @@ export const getGoogleSheetConfig = (): GoogleSheetConfig => {
   const data = localStorage.getItem(GOOGLE_SHEET_CONFIG_KEY);
   if (!data) {
     const defaultConfig: GoogleSheetConfig = {
-      webhookUrl: '',
-      sheetId: '1lS7zlQAjVgjL0mjfo58IYhhD1CHpIQdLho58MMaExl0',
+      webhookUrl: 'https://script.google.com/macros/s/AKfycbwUrDnuL5XfaRfB6pd-tw2xGyFnjPDzQxr_yPV41f2xcsyu25VLfl9qG1MdVO1KSAjwww/exec',
+      sheetId: '1vm0QcEvXniTJhLZEhegemqncddZgaExsyP6ONlJKyK8',
       autoSyncOnApply: true,
       autoSyncOnStageChange: true
     };
@@ -462,7 +462,8 @@ export const getGoogleSheetConfig = (): GoogleSheetConfig => {
     return defaultConfig;
   }
   const parsed = JSON.parse(data);
-  if (!parsed.sheetId) parsed.sheetId = '1lS7zlQAjVgjL0mjfo58IYhhD1CHpIQdLho58MMaExl0';
+  if (!parsed.sheetId) parsed.sheetId = '1vm0QcEvXniTJhLZEhegemqncddZgaExsyP6ONlJKyK8';
+  if (!parsed.webhookUrl) parsed.webhookUrl = 'https://script.google.com/macros/s/AKfycbwUrDnuL5XfaRfB6pd-tw2xGyFnjPDzQxr_yPV41f2xcsyu25VLfl9qG1MdVO1KSAjwww/exec';
   return parsed;
 };
 
