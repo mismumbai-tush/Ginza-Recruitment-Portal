@@ -88,7 +88,6 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({ onSubmit, onCa
           </div>
           <div>
             <h2 className="text-xl font-bold text-white font-display">MRF — Manpower Requisition Form</h2>
-            <p className="text-sm text-slate-400">Blank requisition template matching your MRF Google Sheet</p>
           </div>
         </div>
         <span className="hidden sm:inline-flex items-center text-xs px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-mono">

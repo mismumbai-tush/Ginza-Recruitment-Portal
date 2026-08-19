@@ -86,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   }`}
                 >
                   <Users className="w-4 h-4" />
-                  <span>ATS Candidate Pipeline</span>
+                  <span>Recruitment</span>
                 </button>
 
                 <button

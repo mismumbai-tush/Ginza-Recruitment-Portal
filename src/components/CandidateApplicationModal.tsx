@@ -87,7 +87,7 @@ export const CandidateApplicationModal: React.FC<CandidateApplicationModalProps>
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 max-w-3xl w-full text-white shadow-2xl my-8 relative">
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 max-w-3xl w-full text-white shadow-2xl my-8 relative max-h-[90vh] overflow-y-auto">
         
         {/* Close Button */}
         <button

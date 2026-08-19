@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle, Globe, Clock, AlertCircle, Plus, Filter, Building2, Search, Trash2 } from 'lucide-react';
 import type { JobRequisition } from '../types/recruitment';
-import { isWithinHierarchicalDateFilter, MONTH_NAMES, YEAR_OPTIONS, WEEK_OPTIONS } from '../services/dateUtils';
+import { isWithinHierarchicalDateFilter, formatDisplayDate, MONTH_NAMES, YEAR_OPTIONS, WEEK_OPTIONS } from '../services/dateUtils';
 
 interface RequisitionListProps {
   requisitions: JobRequisition[];
@@ -15,7 +15,7 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
   requisitions,
   onUpdateStatus,
   onOpenNewForm,
-  currentRole,
+  currentRole: _currentRole,
   onDeleteRequisition
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -77,11 +77,6 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-card rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-800">
         <div>
           <h2 className="text-2xl font-extrabold text-white font-display">Job Requirement Requisitions (MRF)</h2>
-          <p className="text-sm text-slate-400 mt-1">
-            {currentRole === 'manager' 
-              ? 'Submit and track manpower requirements created by department heads' 
-              : 'Approve department job requisitions and publish them directly to candidate career portal'}
-          </p>
         </div>
 
         <button
@@ -231,7 +226,7 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
                 <div className="text-xs text-slate-400 text-left md:text-right">
                   Requested by: <br />
                   <span className="text-white font-bold text-sm">{req.requestedBy}</span>
-                  <div className="text-[11px] text-slate-400">{req.createdAt} (Col C)</div>
+                  <div className="text-[11px] text-slate-400">{formatDisplayDate(req.createdAt)} (Col C)</div>
                 </div>
 
                 <div className="flex flex-col items-end space-y-2">

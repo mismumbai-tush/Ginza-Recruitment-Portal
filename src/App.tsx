@@ -160,6 +160,7 @@ export function App() {
               round2Count: Number(getValueByFlexibleKey(row, ['2nd Round Interview'])) || 0,
               round3Count: Number(getValueByFlexibleKey(row, ['3rd Round Interview'])) || 0,
               tat: getValueByFlexibleKey(row, ['TAT']),
+              createdAt: getValueByFlexibleKey(row, ['Timestamp', 'Timestamp Date', 'Date', 'Created At', 'Col C', 'Column C']) || new Date().toISOString().split('T')[0]
             });
             mrfImportedCount++;
           }

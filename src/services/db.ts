@@ -291,13 +291,25 @@ export const getRequisitions = (): JobRequisition[] => {
   return JSON.parse(data);
 };
 
-export const saveRequisition = (requisition: Omit<JobRequisition, 'id' | 'createdAt' | 'status'>): JobRequisition => {
+export const saveRequisition = (requisition: Partial<JobRequisition> & { title: string }): JobRequisition => {
   const reqs = getRequisitions();
   const newReq: JobRequisition = {
+    department: 'General',
+    location: 'Main Office',
+    employmentType: 'Full-time',
+    experienceYears: '1-3 Years',
+    budgetSalary: 'Negotiable',
+    vacancies: 1,
+    priority: 'High',
+    requestedBy: 'Manager',
+    requesterEmail: 'hr@ginzalimited.com',
+    responsibilities: requisition.title,
+    requiredSkills: ['Communication'],
+    description: requisition.title,
     ...requisition,
-    id: `REQ-2026-${String(reqs.length + 1).padStart(3, '0')}`,
-    status: 'Pending Approval',
-    createdAt: new Date().toISOString().split('T')[0]
+    id: requisition.id || `REQ-2026-${String(reqs.length + 1).padStart(3, '0')}`,
+    status: requisition.status || 'Pending Approval',
+    createdAt: requisition.createdAt || new Date().toISOString().split('T')[0]
   };
   const updated = [newReq, ...reqs];
   localStorage.setItem(REQUISITION_STORAGE_KEY, JSON.stringify(updated));
