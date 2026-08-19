@@ -115,9 +115,9 @@ function doPost(e) {
 
       var candRow = [
         c.appliedDate || new Date().toISOString(), c.fullName || "", c.jobTitle || "",
-        c.phone || "", c.email || "", c.education || "", c.currentCompany || "",
+        c.phone || "", c.email || "", c.educationQualification || c.education || "", c.currentCompany || "",
         c.noticePeriod || "", c.experienceYears || "", c.currentSalary || "",
-        c.expectedSalary || "", c.switchReason || "", c.source || "Web Portal",
+        c.expectedSalary || "", c.switchReason || c.whyLookingToSwitch || "", c.source || "Web Portal",
         c.resumeFileName || "", c.location || "", c.sourceCategory || "Direct",
         c.unit || "", c.stage || "Applied", c.screeningRemarks || "Application received",
         "No", "Yes", new Date().toLocaleDateString("en-US", {month: 'short', year: 'numeric'}),
