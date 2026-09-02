@@ -218,14 +218,14 @@ function doGet(e) {
  */
 export const syncCandidateToGoogleSheet = async (
   candidate: Candidate,
-  config: GoogleSheetConfig
+  config?: GoogleSheetConfig
 ): Promise<{ success: boolean; message: string }> => {
-  if (!config.webhookUrl) {
-    return { success: false, message: 'Google Sheets Webhook URL is not configured.' };
-  }
+  const webhookUrl = (config && config.webhookUrl && config.webhookUrl.trim()) 
+    ? config.webhookUrl.trim() 
+    : 'https://script.google.com/macros/s/AKfycbwUrDnuL5XfaRfB6pd-tw2xGyFnjPDzQxr_yPV41f2xcsyu25VLfl9qG1MdVO1KSAjwww/exec';
 
   try {
-    await fetch(config.webhookUrl, {
+    await fetch(webhookUrl, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
@@ -237,7 +237,7 @@ export const syncCandidateToGoogleSheet = async (
     });
 
     markCandidateSynced(candidate.id);
-    return { success: true, message: `✅ Synced ${candidate.fullName} to Google Sheet!` };
+    return { success: true, message: `✅ Synced ${candidate.fullName} directly to Google Sheet!` };
   } catch (err: any) {
     console.error('Google Sheets Sync Error:', err);
     return { success: false, message: err.message || 'Failed to communicate with Google Sheets Webhook.' };
@@ -249,14 +249,14 @@ export const syncCandidateToGoogleSheet = async (
  */
 export const syncRequisitionToGoogleSheet = async (
   requisition: JobRequisition,
-  config: GoogleSheetConfig
+  config?: GoogleSheetConfig
 ): Promise<{ success: boolean; message: string }> => {
-  if (!config.webhookUrl) {
-    return { success: false, message: 'Google Sheets Webhook URL is not configured.' };
-  }
+  const webhookUrl = (config && config.webhookUrl && config.webhookUrl.trim()) 
+    ? config.webhookUrl.trim() 
+    : 'https://script.google.com/macros/s/AKfycbwUrDnuL5XfaRfB6pd-tw2xGyFnjPDzQxr_yPV41f2xcsyu25VLfl9qG1MdVO1KSAjwww/exec';
 
   try {
-    await fetch(config.webhookUrl, {
+    await fetch(webhookUrl, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
