@@ -79,6 +79,8 @@ export interface Candidate {
   source?: string; // Source
   sourceCategory?: string; // Source Category
   resumeFileName: string; // Resume (Attach)
+  resumeBase64?: string;
+  resumeMimeType?: string;
   resumeSummary: string;
   skills?: string[];
   location?: string; // Current Location (City, State)

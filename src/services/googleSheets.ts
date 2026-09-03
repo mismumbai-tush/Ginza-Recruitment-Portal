@@ -113,12 +113,28 @@ function doPost(e) {
       var r2 = evals.find(function(ev) { return ev.roundName && ev.roundName.indexOf("Round 2") !== -1; });
       var r3 = evals.find(function(ev) { return ev.roundName && ev.roundName.indexOf("Round 3") !== -1; });
 
+      var resumeFileUrl = "https://drive.google.com/drive/folders/1dtr0keuzXo-pLzvyeURTlj4MuijFo-R7?usp=sharing";
+
+      if (c.resumeBase64 && c.resumeBase64.length > 10) {
+        try {
+          var driveFolder = DriveApp.getFolderById("1dtr0keuzXo-pLzvyeURTlj4MuijFo-R7");
+          var mime = c.resumeMimeType || "application/pdf";
+          var fileName = (c.fullName || "Candidate").replace(/\s+/g, "_") + "_" + (c.resumeFileName || "Resume.pdf");
+          var blob = Utilities.newBlob(Utilities.base64Decode(c.resumeBase64), mime, fileName);
+          var driveFile = driveFolder.createFile(blob);
+          driveFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+          resumeFileUrl = driveFile.getUrl();
+        } catch (fErr) {
+          resumeFileUrl = "https://drive.google.com/drive/folders/1dtr0keuzXo-pLzvyeURTlj4MuijFo-R7?usp=sharing";
+        }
+      }
+
       var candRow = [
-        c.appliedDate || new Date().toISOString(), c.fullName || "", c.jobTitle || "",
+        c.appliedDate || new Date().toLocaleString("en-IN"), c.fullName || "", c.jobTitle || "",
         c.phone || "", c.email || "", c.educationQualification || c.education || "", c.currentCompany || "",
         c.noticePeriod || "", c.experienceYears || "", c.currentSalary || "",
         c.expectedSalary || "", c.switchReason || c.whyLookingToSwitch || "", c.source || "Web Portal",
-        c.resumeFileName || "", c.location || "", c.sourceCategory || "Direct",
+        resumeFileUrl, c.location || "", c.sourceCategory || "Direct",
         c.unit || "", c.stage || "Applied", c.screeningRemarks || "Application received",
         "No", "Yes", new Date().toLocaleDateString("en-US", {month: 'short', year: 'numeric'}),
         r1 ? r1.evaluatedAt : "", r1 ? r1.interviewerName : "", r1 ? r1.recommendation : "", r1 ? r1.notes : "",

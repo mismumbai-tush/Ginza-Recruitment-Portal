@@ -36,6 +36,8 @@ export const CandidateApplicationModal: React.FC<CandidateApplicationModalProps>
   });
 
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [resumeBase64, setResumeBase64] = useState<string>('');
+  const [resumeMimeType, setResumeMimeType] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,6 +49,16 @@ export const CandidateApplicationModal: React.FC<CandidateApplicationModalProps>
         resumeFileName: file.name,
         resumeSummary: `Uploaded candidate resume file (${(file.size / 1024).toFixed(1)} KB). Format: ${file.type || 'PDF/Doc'}.`
       }));
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target && typeof event.target.result === 'string') {
+          const base64Str = event.target.result.split(',')[1] || '';
+          setResumeBase64(base64Str);
+          setResumeMimeType(file.type || 'application/pdf');
+        }
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -78,6 +90,8 @@ export const CandidateApplicationModal: React.FC<CandidateApplicationModalProps>
         location: formData.location || 'N/A',
         skills: skillsArray,
         resumeFileName: formData.resumeFileName || `${formData.fullName.replace(/\s+/g, '_') || 'Candidate'}_Resume.pdf`,
+        resumeBase64: resumeBase64 || undefined,
+        resumeMimeType: resumeMimeType || undefined,
         resumeSummary: formData.resumeSummary || `${formData.fullName} applied for ${job.title}.`,
         coverLetter: formData.coverLetter
       });
