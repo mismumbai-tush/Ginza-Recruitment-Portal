@@ -129,15 +129,19 @@ function doPost(e) {
         c.remarks || "", ""
       ];
 
-      var candData = candSheet.getDataRange().getValues();
+      var isStageUpdate = (contents.event === 'stage_change' || contents.event === 'evaluation_add');
       var candRowIdx = -1;
-      for (var i = 1; i < candData.length; i++) {
-        var sheetEmail = String(candData[i][4]).trim().toLowerCase();
-        var sheetName = String(candData[i][1]).trim().toLowerCase();
-        if ((sheetEmail && sheetEmail === String(c.email).trim().toLowerCase()) ||
-            (sheetName && sheetName === String(c.fullName).trim().toLowerCase())) {
-          candRowIdx = i + 1;
-          break;
+
+      if (isStageUpdate) {
+        var candData = candSheet.getDataRange().getValues();
+        for (var i = 1; i < candData.length; i++) {
+          var sheetEmail = String(candData[i][4]).trim().toLowerCase();
+          var sheetName = String(candData[i][1]).trim().toLowerCase();
+          if ((sheetEmail && sheetEmail.length > 3 && sheetEmail === String(c.email).trim().toLowerCase()) ||
+              (sheetName && sheetName.length > 2 && sheetName === String(c.fullName).trim().toLowerCase())) {
+            candRowIdx = i + 1;
+            break;
+          }
         }
       }
 

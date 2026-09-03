@@ -313,13 +313,11 @@ export function App() {
     setApplyingJob(null);
     triggerToast(`Application submitted successfully for ${newCandidate.fullName}!`);
 
-    // Auto sync to Google Sheets whenever Webhook URL is configured
-    if (gsheetConfig.webhookUrl) {
-      const res = await syncCandidateToGoogleSheet(newCandidate, gsheetConfig);
-      if (res.success) {
-        setCandidates(getCandidates());
-        triggerToast(`✅ Synced ${newCandidate.fullName} directly to Google Sheet Candidates tab!`);
-      }
+    // Always sync candidate application directly to Google Sheet
+    const res = await syncCandidateToGoogleSheet(newCandidate, gsheetConfig);
+    if (res.success) {
+      setCandidates(getCandidates());
+      triggerToast(`✅ Synced ${newCandidate.fullName} directly to Google Sheet Candidates tab!`);
     }
   };
 
