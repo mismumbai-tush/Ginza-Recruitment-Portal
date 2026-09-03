@@ -27,7 +27,7 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
   const [selectedWeek, setSelectedWeek] = useState<string>('All');
 
   // Extract unique Units / Branches from MRF Requisitions
-  const uniqueUnits = Array.from(new Set(requisitions.map(r => r.unitBranch).filter(Boolean))) as string[];
+  const uniqueUnits = (Array.from(new Set(requisitions.map(r => r.unitBranch).filter((u): u is string => Boolean(u)))) as string[]).sort((a, b) => a.localeCompare(b));
 
   // Filter MRF Requisitions using Column C Timestamp (createdAt)
   const filteredRequisitions = requisitions.filter(req => {

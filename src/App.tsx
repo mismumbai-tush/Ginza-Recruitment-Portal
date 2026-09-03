@@ -130,9 +130,10 @@ export function App() {
         const title = getValueByFlexibleKey(row, ['Required Position', 'Title', 'Job Title', 'Position', 'Requirement', 'MRF Title', 'Role']);
         if (title) {
           const reqId = getValueByFlexibleKey(row, ['MRF ID', 'ID', 'Requisition ID', 'MRF No']) || `MRF-GS-${idx + 1}`;
-          const existing = existingReqs.find(r => r.id === reqId || r.title === title);
+          const existing = existingReqs.find(r => r.id === reqId);
           if (!existing) {
             saveRequisition({
+              id: reqId,
               title,
               unitBranch: getValueByFlexibleKey(row, ['Unit/ Branch', 'Unit', 'Branch']),
               department: getValueByFlexibleKey(row, ['Department', 'Dept', 'Team']) || 'General',

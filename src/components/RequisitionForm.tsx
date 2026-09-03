@@ -8,21 +8,40 @@ interface RequisitionFormProps {
 }
 
 const DEFAULT_UNITS = [
-  'UDH',
-  'SAC',
-  'EHU',
+  'Ahmedabad',
+  'ALU',
+  'Apparel Park',
   'CKU',
-  'Ginza Corporate Office',
-  'Unit 1 - Main Manufacturing Plant',
-  'Unit 2 - Production & Assembly Division',
-  'Unit 3 - Textile & Garment Division',
-  'R&D Hub',
-  'Warehouse & Logistics',
-  'Other / Custom Branch'
+  'DELHI',
+  'DEVIKA',
+  'DMN',
+  'DPU',
+  'EHU',
+  'EMB',
+  'Eye Hook Unit',
+  'KDC',
+  'KNITTING UNIT',
+  'Kolkata',
+  'LMN',
+  'MUM',
+  'SAC',
+  'SAC-IT',
+  'Sachin',
+  'Sachin Knitting',
+  'SGU',
+  'SLU',
+  'SOIE',
+  'SUN',
+  'Sunsilk',
+  'SUR',
+  'TDU',
+  'TIRUPUR',
+  'UDH',
+  'VAU'
 ] as const;
 
 export const RequisitionForm: React.FC<RequisitionFormProps> = ({ onSubmit, onCancel }) => {
-  const [selectedUnit, setSelectedUnit] = useState<string>('UDH');
+  const [selectedUnit, setSelectedUnit] = useState<string>('Ahmedabad');
   const [customUnit, setCustomUnit] = useState<string>('');
 
   const [formData, setFormData] = useState({
