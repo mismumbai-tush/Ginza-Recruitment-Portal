@@ -129,39 +129,49 @@ function doPost(e) {
         }
       }
 
+      var screeningStat = c.screeningStatus || (c.stage === 'Screening' ? 'Screening' : (c.stage === 'Applied' ? 'Applied' : c.stage));
+      var offerStat = c.offerLetterStatus || (c.stage === 'Offer Sent' ? 'Offer Sent' : (c.stage === 'Joined' ? 'Offer Accepted' : 'Pending'));
+      var joinStat = c.joiningStatus || (c.stage === 'Joined' ? 'Joined' : (c.stage === 'Rejected' ? 'Rejection From Candidate' : 'In Progress'));
+
       var candRow = [
         c.appliedDate || new Date().toLocaleString("en-IN"), c.fullName || "", c.jobTitle || "",
         c.phone || "", c.email || "", c.educationQualification || c.education || "", c.currentCompany || "",
         c.noticePeriod || "", c.experienceYears || "", c.currentSalary || "",
         c.expectedSalary || "", c.switchReason || c.whyLookingToSwitch || "", c.source || "Web Portal",
         resumeFileUrl, c.location || "", c.sourceCategory || "Direct",
-        c.unit || "", c.stage || "Applied", c.screeningRemarks || "Application received",
+        c.unit || "", screeningStat, c.screeningRemarks || "Application received",
         "No", "Yes", new Date().toLocaleDateString("en-US", {month: 'short', year: 'numeric'}),
-        r1 ? r1.evaluatedAt : "", r1 ? r1.interviewerName : "", r1 ? r1.recommendation : "", r1 ? r1.notes : "",
-        r2 ? r2.evaluatedAt : "", r2 ? r2.interviewerName : "", r2 ? r2.recommendation : "", r2 ? r2.notes : "",
-        r3 ? r3.evaluatedAt : "", r3 ? r3.interviewerName : "", r3 ? r3.recommendation : "", r3 ? r3.notes : "",
-        c.joiningDate || "", c.offeredSalary || "", "", "", "", "", "", "",
-        c.offerLetterStatus || "Pending", c.joiningDate || "", "", c.joiningStatus || "In Progress",
+        r1 ? (r1.interviewDate || r1.evaluatedAt) : "", r1 ? r1.interviewerName : "", r1 ? (r1.interviewStatus || r1.recommendation) : "", r1 ? r1.notes : "",
+        r2 ? (r2.interviewDate || r2.evaluatedAt) : "", r2 ? r2.interviewerName : "", r2 ? (r2.interviewStatus || r2.recommendation) : "", r2 ? r2.notes : "",
+        r3 ? (r3.interviewDate || r3.evaluatedAt) : "", r3 ? r3.interviewerName : "", r3 ? (r3.interviewStatus || r3.recommendation) : "", r3 ? r3.notes : "",
+        c.joiningDate || "", c.offeredSalary || "", "", "", "", "", "",
+        c.offerAcceptanceDate || c.lastUpdated || "", offerStat, c.dateOfJoining || c.joiningDate || "", "", joinStat,
         c.remarks || "", ""
       ];
 
-      var isStageUpdate = (contents.event === 'stage_change' || contents.event === 'evaluation_add');
+      // Always search for existing candidate by Email or Name to update in place
+      var candData = candSheet.getDataRange().getValues();
       var candRowIdx = -1;
 
-      if (isStageUpdate) {
-        var candData = candSheet.getDataRange().getValues();
-        for (var i = 1; i < candData.length; i++) {
-          var sheetEmail = String(candData[i][4]).trim().toLowerCase();
-          var sheetName = String(candData[i][1]).trim().toLowerCase();
-          if ((sheetEmail && sheetEmail.length > 3 && sheetEmail === String(c.email).trim().toLowerCase()) ||
-              (sheetName && sheetName.length > 2 && sheetName === String(c.fullName).trim().toLowerCase())) {
-            candRowIdx = i + 1;
-            break;
-          }
+      for (var i = 1; i < candData.length; i++) {
+        var sheetEmail = String(candData[i][4]).trim().toLowerCase();
+        var sheetName = String(candData[i][1]).trim().toLowerCase();
+        var inputEmail = String(c.email || "").trim().toLowerCase();
+        var inputName = String(c.fullName || "").trim().toLowerCase();
+
+        if ((inputEmail && inputEmail.length > 3 && sheetEmail === inputEmail) ||
+            (inputName && inputName.length > 2 && sheetName === inputName)) {
+          candRowIdx = i + 1;
+          break;
         }
       }
 
       if (candRowIdx > 0) {
+        // Preserve existing Column N Resume Link if existing link is valid and new link is default folder
+        var existingRow = candData[candRowIdx - 1];
+        if (existingRow && existingRow[13] && String(existingRow[13]).indexOf("http") !== -1 && resumeFileUrl.indexOf("folders") !== -1) {
+          candRow[13] = existingRow[13];
+        }
         candSheet.getRange(candRowIdx, 1, 1, candRow.length).setValues([candRow]);
       } else {
         candSheet.appendRow(candRow);
