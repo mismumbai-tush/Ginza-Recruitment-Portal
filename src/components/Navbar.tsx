@@ -228,43 +228,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
       </div>
-
-      {/* ── CSS KEYFRAME MARQUEE TICKER BANNER (28s LINEAR INFINITE WITH PAUSE-ON-HOVER) ── */}
-      <div className={`overflow-hidden border-t py-2 text-xs font-semibold select-none border-b ${
-        isDark ? 'bg-slate-950/90 border-slate-800/80 text-slate-300' : 'bg-slate-900 text-slate-200 border-slate-800'
-      }`}>
-        <div className="animate-marquee-ticker flex items-center whitespace-nowrap gap-8">
-          {[1, 2].map((group) => (
-            <div key={group} className="flex items-center space-x-8 shrink-0">
-              <span className="flex items-center space-x-2 text-indigo-400">
-                <span className="w-2 h-2 rounded-full bg-indigo-400 animate-ping" />
-                <span className="font-extrabold uppercase tracking-wider text-[11px] text-white">Live Platform:</span>
-                <span className="text-slate-300">Ginza Industries Recruitment Automation Suite</span>
-              </span>
-
-              <span className="flex items-center space-x-2 text-emerald-400">
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Google Sheet Live</span>
-                <span className="text-slate-300">Synchronized with Candidates & MRF Sheets</span>
-              </span>
-
-              <span className="flex items-center space-x-2 text-amber-400">
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">30 Active Units</span>
-                <span className="text-slate-300">Ahmedabad • Apparel Park • CKU • DELHI • DMN • DPU • EHU • EMB • KDC • Kolkata • MUM • SAC • Sachin • SLU • SUR • VAU</span>
-              </span>
-
-              <span className="flex items-center space-x-2 text-purple-400">
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">Drive Vault</span>
-                <span className="text-slate-300">Auto Resume Uploads to Google Drive Folder 1dtr0keuzXo-pLzvyeURTlj4MuijFo-R7</span>
-              </span>
-
-              <span className="flex items-center space-x-2 text-cyan-400">
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">In-Place Same-Row Updates</span>
-                <span className="text-slate-300">Screening (Col R) • 1st Round (W-Z) • 2nd Round (AA-AD) • 3rd Round (AE-AH) • Joining & Offer (AI, AJ, AP, AQ, AR, AT)</span>
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
     </header>
   );
 };
